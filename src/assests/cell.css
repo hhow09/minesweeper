@@ -1,0 +1,15 @@
+.cell {
+  width: 15px;
+  height: 15px;
+  margin: 0.5px;
+  background-color: grey;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.cell.opened {
+  border: none;
+}
