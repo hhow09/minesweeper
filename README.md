@@ -2,6 +2,8 @@
 
 Implement the classic Windows game Minesweeper with React.
 
+[Live Demo](https://hhow09.github.io/minesweeper/)
+
 ## Rules
 
 1. Clicking a mine ends the game.
