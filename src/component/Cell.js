@@ -4,8 +4,11 @@ import flagPic from "assests/flag.png";
 
 import PropTypes from "prop-types";
 
-const Cell = ({ opened, isBomb, adjBombNum, onClick, disabled, flagged }) => (
-  <div className={`cell ${opened && "opened"}`} onClick={!disabled ? onClick : () => null}>
+const Cell = ({ opened, isBomb, adjBombNum, onClick, disabled, flagged, backgroundColor }) => (
+  <div
+    className={`cell ${opened && "opened"}`}
+    onClick={!disabled ? onClick : () => null}
+    style={{ backgroundColor }}>
     {opened ? (
       isBomb ? (
         <img src={bombPic} width="100%" />

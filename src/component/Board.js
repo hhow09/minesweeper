@@ -113,9 +113,14 @@ const Board = ({
       if (openedCount.current === 0) {
         handleFirstBomb(row, col);
       } else {
-        //TODO open red bomb
+        setBoardState((prevState) => {
+          let newState = JSON.parse(JSON.stringify(prevState));
+
+          showLog && console.log(`Clicked a Bomb on [${row},${col}]`);
+          newState[row][col] = { ...newState[row][col], opened: true, backgroundColor: "red" };
+          return newState;
+        });
         endGameCallback(false);
-        //TODO open all
       }
     }
 
