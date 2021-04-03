@@ -123,6 +123,7 @@ function App() {
             key={round}
             width={boardWidth}
             height={boardHeight}
+            bombProbability={bombProbability}
             endGameCallback={handleEndGame}
             disabled={!started}
             showAll={round > 1 && !started}
