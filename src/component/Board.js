@@ -13,10 +13,11 @@ const Board = ({
   width,
   height,
   bombProbability = 0.2,
-  showLog = false,
+  showLog = true,
   endGameCallback,
   disabled = false,
 }) => {
+  const visitedRef = useRef([]);
   const bombCount = useRef(0);
   const openedCount = useRef(0);
   const [boardState, setBoardState] = useState(
@@ -43,11 +44,12 @@ const Board = ({
     });
     showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
   };
+
   const modifyBombSideEffect = (row, col, add = true) => {
     // purpose: record the adjacent cells and do adjBombNum++ later
     if (add) bombCount.current++;
     //place bomb
-    else bombCount.current--; //remove bomb (called only by handleFirstBomb)
+    else bombCount.current--; //remove bomb (only called by handleFirstBomb)
 
     let sideEffects = [];
     if (row - 1 >= 0) {
@@ -70,6 +72,7 @@ const Board = ({
   }, []);
 
   const handleFirstBomb = (row, col) => {
+    //purpose: when user clicking on the bomb on first step, modify it to normal cell.
     const sideEffects = modifyBombSideEffect(row, col, false);
     setBoardState((prevState) => {
       let newState = JSON.parse(JSON.stringify(prevState));
@@ -80,6 +83,27 @@ const Board = ({
       }
       return newState;
     });
+  };
+
+  const findAdjacentSafeCells = (row, col, visitedRef, startCell = false) => {
+    // purpose: Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
+    if (
+      row < 0 ||
+      col < 0 ||
+      row > height - 1 ||
+      col > width - 1 ||
+      boardState[row][col].opened === true ||
+      visitedRef.current[row][col] ||
+      boardState[row][col].isBomb === true ||
+      (!startCell && boardState[row][col].adjBombNum > 0)
+    ) {
+      return; //stop condition
+    }
+    visitedRef.current[row][col] = true;
+    findAdjacentSafeCells(row - 1, col, visitedRef);
+    findAdjacentSafeCells(row + 1, col, visitedRef);
+    findAdjacentSafeCells(row, col + 1, visitedRef);
+    findAdjacentSafeCells(row, col - 1, visitedRef);
   };
 
   const handleClickCell = (row, col, e) => {
@@ -94,13 +118,28 @@ const Board = ({
         //TODO open all
       }
     }
-    //TODO deal with Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
     openedCount.current++;
+    visitedRef.current = new Array(height).fill(0).map(() => new Array(width).fill(false)); //reset
+    findAdjacentSafeCells(row, col, visitedRef, true);
     const allOpened = width * height - bombCount.current === openedCount.current;
     if (allOpened) endGameCallback(true); //TODO open all
 
     setBoardState((prevState) => {
       let newState = JSON.parse(JSON.stringify(prevState));
+      const adjacentSafeCells = visitedRef.current.reduce(
+        (result, row, rowIdx) => [
+          ...result,
+          ...row.reduce((result, cellVisited, colIdx) => {
+            if (cellVisited === true) return [...result, { row: rowIdx, col: colIdx }];
+            else return [...result];
+          }, []),
+        ],
+        []
+      );
+      showLog && console.log("Found adjacentSafeCells", adjacentSafeCells);
+      adjacentSafeCells.forEach((cell) => {
+        newState[cell.row][cell.col].opened = true;
+      });
       newState[row][col].opened = true;
       return newState;
     });
