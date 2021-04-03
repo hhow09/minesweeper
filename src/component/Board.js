@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
+
 import Cell from "component/Cell";
 const DEFAULT_CELL_STATE = {
   opened: false,
@@ -6,7 +8,14 @@ const DEFAULT_CELL_STATE = {
   adjBombNum: 0,
 };
 
-const Board = ({ width, height, bombProbability = 0.2, tutorial = false, endGameCallback }) => {
+const Board = ({
+  width,
+  height,
+  bombProbability = 0.2,
+  showLog = false,
+  endGameCallback,
+  disabled = false,
+}) => {
   const bombCount = useRef(0);
   const openedCount = useRef(0);
   const [boardState, setBoardState] = useState(
@@ -14,7 +23,7 @@ const Board = ({ width, height, bombProbability = 0.2, tutorial = false, endGame
   );
 
   const placeBomb = () => {
-    tutorial && console.log("placeBomb start");
+    showLog && console.log("placeBomb start");
     setBoardState((prevState) => {
       let newState = JSON.parse(JSON.stringify(prevState));
       let sideEffects = []; //index of cell that should adjBombNum ++ at next step
@@ -31,7 +40,7 @@ const Board = ({ width, height, bombProbability = 0.2, tutorial = false, endGame
       }
       return newState;
     });
-    tutorial && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
+    showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
   };
   const modifyBombSideEffect = (row, col, add = true) => {
     // record the adjacent cells and do adjBombNum++ later
@@ -104,12 +113,22 @@ const Board = ({ width, height, bombProbability = 0.2, tutorial = false, endGame
               onClick={() => {
                 handleClickCell(idxRow, idxCell);
               }}
+              disabled={disabled}
             />
           ))}
         </div>
       ))}
     </div>
   );
+};
+
+Board.propTypes = {
+  width: PropTypes.number,
+  height: PropTypes.number,
+  bombProbability: PropTypes.number,
+  showLog: PropTypes.bool,
+  endGameCallback: PropTypes.func,
+  disabled: PropTypes.bool, // all cell unclickable
 };
 
 export default Board;
