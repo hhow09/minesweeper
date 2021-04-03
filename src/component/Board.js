@@ -16,6 +16,7 @@ const Board = ({
   showLog,
   endGameCallback,
   disabled = false,
+  showAll = false,
 }) => {
   const bombCount = useRef(0);
   const openedCount = useRef(0);
@@ -160,6 +161,7 @@ const Board = ({
                 handleClickCell(idxRow, idxCell, e);
               }}
               disabled={disabled}
+              opened={cell.opened || showAll}
             />
           ))}
         </div>
@@ -175,6 +177,7 @@ Board.propTypes = {
   showLog: PropTypes.bool,
   endGameCallback: PropTypes.func,
   disabled: PropTypes.bool, // all cell unclickable
+  showAll: PropTypes.bool, // show all cells
 };
 
 export default Board;

@@ -125,6 +125,7 @@ function App() {
             height={boardHeight}
             endGameCallback={handleEndGame}
             disabled={!started}
+            showAll={round > 1 && !started}
             showLog={showLog}
           />
         </section>
