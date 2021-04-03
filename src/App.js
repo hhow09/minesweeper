@@ -3,7 +3,7 @@ import { useState } from "react";
 const pageStyle = { display: "flex", flexDirection: "column", alignItems: "center" };
 
 const configStyle = { display: "flex", flexDirection: "column", marginBottom: "20px" };
-const labelStyle = { display: "flex", justifyContent: "space-around", marginBottom: "5px" };
+const labelStyle = { display: "flex", justifyContent: "space-between", marginBottom: "5px" };
 
 const Page = ({ title, children }) => (
   <div style={pageStyle}>
@@ -15,6 +15,7 @@ const Page = ({ title, children }) => (
 function App() {
   const [boardWidth, setBoardWidth] = useState(10);
   const [boardHeight, setBoardHeight] = useState(10);
+  const [showLog, setShowLog] = useState(false);
 
   const [started, setStarted] = useState(false);
   const [round, setRound] = useState(1);
@@ -53,6 +54,16 @@ function App() {
               }}
             />
           </label>
+          <label style={labelStyle}>
+            Show Log
+            <input
+              checked={showLog}
+              type="checkbox"
+              onChange={() => {
+                setShowLog((prev) => !prev);
+              }}
+            />
+          </label>
           <button
             onClick={() => {
               if (started) {
@@ -71,6 +82,7 @@ function App() {
           height={boardHeight}
           endGameCallback={handleEndGame}
           disabled={!started}
+          showLog={showLog}
         />
       </Page>
     </div>
