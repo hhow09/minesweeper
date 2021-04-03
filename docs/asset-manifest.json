@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "https://hhow09.github.io/minesweeper/static/css/main.711c6693.chunk.css",
+    "main.js": "https://hhow09.github.io/minesweeper/static/js/main.9d20c037.chunk.js",
+    "runtime-main.js": "https://hhow09.github.io/minesweeper/static/js/runtime-main.72da8e8d.js",
+    "static/js/2.8d3b730d.chunk.js": "https://hhow09.github.io/minesweeper/static/js/2.8d3b730d.chunk.js",
+    "static/js/3.beb55570.chunk.js": "https://hhow09.github.io/minesweeper/static/js/3.beb55570.chunk.js",
+    "index.html": "https://hhow09.github.io/minesweeper/index.html",
+    "static/js/2.8d3b730d.chunk.js.LICENSE.txt": "https://hhow09.github.io/minesweeper/static/js/2.8d3b730d.chunk.js.LICENSE.txt",
+    "static/media/bomb.80edd8c7.png": "https://hhow09.github.io/minesweeper/static/media/bomb.80edd8c7.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.72da8e8d.js",
+    "static/js/2.8d3b730d.chunk.js",
+    "static/css/main.711c6693.chunk.css",
+    "static/js/main.9d20c037.chunk.js"
+  ]
+}
