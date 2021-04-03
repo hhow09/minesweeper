@@ -6,6 +6,7 @@ const DEFAULT_CELL_STATE = {
   opened: false,
   isBomb: false,
   adjBombNum: 0,
+  flagged: false,
 };
 
 const Board = ({
@@ -43,7 +44,7 @@ const Board = ({
     showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
   };
   const modifyBombSideEffect = (row, col, add = true) => {
-    // record the adjacent cells and do adjBombNum++ later
+    // purpose: record the adjacent cells and do adjBombNum++ later
     if (add) bombCount.current++;
     //place bomb
     else bombCount.current--; //remove bomb (called only by handleFirstBomb)
@@ -81,11 +82,14 @@ const Board = ({
     });
   };
 
-  const handleClickCell = (row, col) => {
+  const handleClickCell = (row, col, e) => {
+    //TODO rise flag on right click
+    //TODO performance: long time click handler
     if (boardState[row][col].isBomb) {
       if (openedCount.current === 0) {
         handleFirstBomb(row, col);
       } else {
+        //TODO open red bomb
         endGameCallback(false);
         //TODO open all
       }
@@ -110,8 +114,8 @@ const Board = ({
             <Cell
               {...cell}
               key={`cell_${idxCell}`}
-              onClick={() => {
-                handleClickCell(idxRow, idxCell);
+              onClick={(e) => {
+                handleClickCell(idxRow, idxCell, e);
               }}
               disabled={disabled}
             />

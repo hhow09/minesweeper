@@ -1,15 +1,28 @@
 .cell {
-  width: 15px;
-  height: 15px;
-  margin: 0.5px;
-  background-color: grey;
-  border: 1px solid black;
+  width: 24px;
+  height: 24px;
+  background-color: #c6c6c6;
+  border-top: white 2px solid;
+  border-left: white 2px solid;
+  border-right: #808080 2px solid;
+  border-bottom: #808080 2px solid;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
+  font-family: "Courier New", monospace;
+  font-size: 24px;
+  font-weight: bolder;
 }
 
 .cell.opened {
-  border: none;
+  border: #808080 1px solid;
+}
+
+.bombNum_1 {
+  color: #0017c5;
+}
+
+.bombNum_2 {
+  color: #377d22;
 }
