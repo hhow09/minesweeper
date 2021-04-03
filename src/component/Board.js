@@ -17,7 +17,6 @@ const Board = ({
   endGameCallback,
   disabled = false,
 }) => {
-  const visitedRef = useRef([]);
   const bombCount = useRef(0);
   const openedCount = useRef(0);
   const [boardState, setBoardState] = useState(
@@ -85,7 +84,7 @@ const Board = ({
     });
   };
 
-  const findAdjacentSafeCells = (row, col, visitedRef, startCell = false) => {
+  const findAdjacentSafeCells = (row, col, visited, startCell = false) => {
     // purpose: Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
     if (
       row < 0 ||
@@ -93,17 +92,17 @@ const Board = ({
       row > height - 1 ||
       col > width - 1 ||
       boardState[row][col].opened === true ||
-      visitedRef.current[row][col] ||
+      visited[row][col] ||
       boardState[row][col].isBomb === true ||
       (!startCell && boardState[row][col].adjBombNum > 0)
     ) {
       return; //stop condition
     }
-    visitedRef.current[row][col] = true;
-    findAdjacentSafeCells(row - 1, col, visitedRef);
-    findAdjacentSafeCells(row + 1, col, visitedRef);
-    findAdjacentSafeCells(row, col + 1, visitedRef);
-    findAdjacentSafeCells(row, col - 1, visitedRef);
+    visited[row][col] = true;
+    findAdjacentSafeCells(row - 1, col, visited);
+    findAdjacentSafeCells(row + 1, col, visited);
+    findAdjacentSafeCells(row, col + 1, visited);
+    findAdjacentSafeCells(row, col - 1, visited);
   };
 
   const handleClickCell = (row, col, e) => {
@@ -118,32 +117,37 @@ const Board = ({
         //TODO open all
       }
     }
-    openedCount.current++;
-    visitedRef.current = new Array(height).fill(0).map(() => new Array(width).fill(false)); //reset
-    findAdjacentSafeCells(row, col, visitedRef, true);
-    const allOpened = width * height - bombCount.current === openedCount.current;
-    if (allOpened) endGameCallback(true); //TODO open all
 
+    let visited = new Array(height).fill(1).map(() => new Array(width).fill(false));
+    findAdjacentSafeCells(row, col, visited, true);
+    const adjacentSafeCells = visited.reduce(
+      (result, row, rowIdx) => [
+        ...result,
+        ...row.reduce((result, cellVisited, colIdx) => {
+          if (cellVisited === true) return [...result, { row: rowIdx, col: colIdx }];
+          else return [...result];
+        }, []),
+      ],
+      []
+    );
     setBoardState((prevState) => {
       let newState = JSON.parse(JSON.stringify(prevState));
-      const adjacentSafeCells = visitedRef.current.reduce(
-        (result, row, rowIdx) => [
-          ...result,
-          ...row.reduce((result, cellVisited, colIdx) => {
-            if (cellVisited === true) return [...result, { row: rowIdx, col: colIdx }];
-            else return [...result];
-          }, []),
-        ],
-        []
-      );
+
       showLog && console.log("Found adjacentSafeCells", adjacentSafeCells);
       adjacentSafeCells.forEach((cell) => {
         newState[cell.row][cell.col].opened = true;
       });
-      newState[row][col].opened = true;
       return newState;
     });
+
+    openedCount.current += adjacentSafeCells.length;
+    console.log(openedCount.current);
   };
+
+  useEffect(() => {
+    const isAllOpened = width * height - bombCount.current === openedCount.current;
+    if (isAllOpened) endGameCallback(true);
+  }, [openedCount.current]);
 
   return (
     <div>
