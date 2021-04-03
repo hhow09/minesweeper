@@ -1,7 +1,12 @@
 import Board from "component/Board";
 import { useState } from "react";
+const pageStyle = { display: "flex", flexDirection: "column", alignItems: "center" };
+
+const configStyle = { display: "flex", flexDirection: "column", marginBottom: "20px" };
+const labelStyle = { display: "flex", justifyContent: "space-around", marginBottom: "5px" };
+
 const Page = ({ title, children }) => (
-  <div>
+  <div style={pageStyle}>
     <h1>{title}</h1>
     {children}
   </div>
@@ -22,27 +27,32 @@ function App() {
   return (
     <div>
       <Page>
-        <div>
-          <input
-            placeholder="Board Width"
-            value={boardWidth}
-            type="number"
-            disabled={started}
-            min={1}
-            onChange={(e) => {
-              setBoardWidth(parseInt(e.target.value));
-            }}
-          />
-          <input
-            placeholder="Board Height"
-            value={boardHeight}
-            type="number"
-            disabled={started}
-            min={1}
-            onChange={(e) => {
-              setBoardHeight(parseInt(e.target.value));
-            }}
-          />
+        <div style={configStyle}>
+          <label style={labelStyle}>
+            Board Width
+            <input
+              placeholder="Board Width"
+              value={boardWidth}
+              type="number"
+              disabled={started}
+              min={1}
+              onChange={(e) => {
+                setBoardWidth(parseInt(e.target.value));
+              }}
+            />
+          </label>
+          <label style={labelStyle}>
+            Board Height
+            <input
+              value={boardHeight}
+              type="number"
+              disabled={started}
+              min={1}
+              onChange={(e) => {
+                setBoardHeight(parseInt(e.target.value));
+              }}
+            />
+          </label>
           <button
             onClick={() => {
               if (started) {
@@ -60,6 +70,7 @@ function App() {
           width={boardWidth}
           height={boardHeight}
           endGameCallback={handleEndGame}
+          disabled={!started}
         />
       </Page>
     </div>
