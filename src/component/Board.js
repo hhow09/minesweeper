@@ -13,7 +13,7 @@ const Board = ({
   width,
   height,
   bombProbability = 0.2,
-  showLog = true,
+  showLog,
   endGameCallback,
   disabled = false,
 }) => {
@@ -141,7 +141,6 @@ const Board = ({
     });
 
     openedCount.current += adjacentSafeCells.length;
-    console.log(openedCount.current);
   };
 
   useEffect(() => {
