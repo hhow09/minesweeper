@@ -24,29 +24,8 @@ const Board = ({
     new Array(height).fill(new Array(width).fill(DEFAULT_CELL_STATE))
   );
 
-  const placeBomb = () => {
-    showLog && console.log("placeBomb start");
-    setBoardState((prevState) => {
-      let newState = JSON.parse(JSON.stringify(prevState));
-      let sideEffects = []; //index of cell that should adjBombNum ++ at next step
-      for (let rowIdx = 0; rowIdx < height; rowIdx++) {
-        for (let colIdx = 0; colIdx < width; colIdx++) {
-          if (Math.random() < bombProbability) {
-            newState[rowIdx][colIdx].isBomb = true;
-            sideEffects = [...sideEffects, ...modifyBombSideEffect(rowIdx, colIdx)];
-          }
-        }
-      }
-      for (let cell of sideEffects) {
-        newState[cell.row][cell.col].adjBombNum++;
-      }
-      return newState;
-    });
-    showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
-  };
-
   const modifyBombSideEffect = (row, col, add = true) => {
-    // purpose: record the adjacent cells and do adjBombNum++ later
+    // purpose: record the adjacent cells and update adjBombNum later
     if (add) bombCount.current++;
     //place bomb
     else bombCount.current--; //remove bomb (only called by handleFirstBomb)
@@ -68,6 +47,26 @@ const Board = ({
   };
 
   useEffect(() => {
+    const placeBomb = () => {
+      showLog && console.log("placeBomb start");
+      setBoardState((prevState) => {
+        let newState = JSON.parse(JSON.stringify(prevState));
+        let sideEffects = []; //index of cell that should adjBombNum ++ at next step
+        for (let rowIdx = 0; rowIdx < height; rowIdx++) {
+          for (let colIdx = 0; colIdx < width; colIdx++) {
+            if (Math.random() < bombProbability) {
+              newState[rowIdx][colIdx].isBomb = true;
+              sideEffects = [...sideEffects, ...modifyBombSideEffect(rowIdx, colIdx)];
+            }
+          }
+        }
+        for (let cell of sideEffects) {
+          newState[cell.row][cell.col].adjBombNum++;
+        }
+        return newState;
+      });
+      showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
+    };
     placeBomb();
   }, []);
 
