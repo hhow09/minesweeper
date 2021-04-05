@@ -107,8 +107,31 @@ export const openBomb = ({ row, col, boardState, showLog }) => {
   };
 };
 
+export const flagCell = ({ row, col, boardState, showLog }) => {
+  let newRow = boardState[row];
+  newRow[col].flagged = true;
+  showLog && console.log(`Open a Cell at [${row},${col}]`);
+
+  return {
+    row,
+    col,
+    boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
+  };
+};
+
+export const unFlagCell = ({ row, col, boardState, showLog }) => {
+  let newRow = boardState[row];
+  newRow[col].flagged = false;
+  showLog && console.log(`Open a Cell at [${row},${col}]`);
+
+  return {
+    row,
+    col,
+    boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
+  };
+};
+
 export const doSideEffect = (fn) => (args) => {
-  console.log("doSideEffect");
   fn(args);
   return args;
 };
