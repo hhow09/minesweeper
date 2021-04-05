@@ -7,6 +7,7 @@
   border-right: #808080 2px solid;
   border-bottom: #808080 2px solid;
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;

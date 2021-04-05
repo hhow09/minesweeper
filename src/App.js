@@ -6,6 +6,7 @@ const pageStyle = {
   flexDirection: "column",
   alignItems: "center",
   minHeight: "100vh",
+  overflow: "auto",
 };
 
 const configStyle = {
@@ -14,6 +15,11 @@ const configStyle = {
   marginBottom: "20px",
   border: "2px solid black",
   padding: "20px",
+};
+
+const boardStyle = {
+  maxWidth: "90vw",
+  overflow: "scroll",
 };
 const labelStyle = { display: "flex", justifyContent: "space-between", marginBottom: "5px" };
 
@@ -118,7 +124,7 @@ function App() {
             {started ? "STOP" : "START"}
           </button>
         </section>
-        <section>
+        <section style={boardStyle}>
           <Board
             key={round}
             width={boardWidth || 0}
