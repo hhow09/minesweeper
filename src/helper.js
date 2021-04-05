@@ -61,10 +61,14 @@ const findAdjacentSafeCells = (row, col, visited, boardState) => {
   }
   visited[row][col] = true;
 
-  const adjacentCells = getAdjacentCells(row, col, width, height);
-  adjacentCells.forEach((cell) => {
-    findAdjacentSafeCells(cell.row, cell.col, visited, boardState);
-  });
+  const adjacentCells = getAdjacentCells(row, col, width, height).filter(
+    (cell) => !visited[cell.row][cell.col] && !boardState[row][col].opened
+  );
+
+  adjacentCells.length > 0 &&
+    adjacentCells.forEach((cell) => {
+      findAdjacentSafeCells(cell.row, cell.col, visited, boardState);
+    });
 };
 
 export const openAdjacentSafeCells = ({ row, col, boardState, showLog }) => {
