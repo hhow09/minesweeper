@@ -85,7 +85,7 @@ const Board = ({
     });
   };
 
-  const findAdjacentSafeCells = (row, col, visited, startCell = false) => {
+  const findAdjacentSafeCells = (row, col, visited) => {
     // purpose: Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
     if (
       row < 0 ||
@@ -94,21 +94,29 @@ const Board = ({
       col > width - 1 ||
       boardState[row][col].opened === true ||
       visited[row][col] ||
-      boardState[row][col].isBomb === true ||
-      (!startCell && boardState[row][col].adjBombNum > 0)
-    ) {
-      return; //stop condition
+      boardState[row][col].isBomb === true
+    )
+      //stop condition
+      return;
+    else if (boardState[row][col].adjBombNum > 0) {
+      visited[row][col] = true;
+      return;
     }
     visited[row][col] = true;
-    findAdjacentSafeCells(row - 1, col, visited);
-    findAdjacentSafeCells(row + 1, col, visited);
-    findAdjacentSafeCells(row, col + 1, visited);
-    findAdjacentSafeCells(row, col - 1, visited);
+    findAdjacentSafeCells(row - 1, col, visited); // top
+    findAdjacentSafeCells(row - 1, col - 1, visited); // left-top
+    findAdjacentSafeCells(row - 1, col + 1, visited); // right-top
+    findAdjacentSafeCells(row + 1, col, visited); // bottom
+    findAdjacentSafeCells(row + 1, col + 1, visited); //right-bottom
+    findAdjacentSafeCells(row + 1, col - 1, visited); //left-bottom
+    findAdjacentSafeCells(row, col + 1, visited); // right
+    findAdjacentSafeCells(row, col - 1, visited); // left
   };
 
   const handleClickCell = (row, col, e) => {
     //TODO rise flag on right click
     //TODO performance: long time click handler
+    if (boardState[row][col].opened || boardState[row][col].flagged) return;
     if (boardState[row][col].isBomb) {
       if (openedCount.current === 0) {
         handleFirstBomb(row, col);
@@ -116,37 +124,47 @@ const Board = ({
         setBoardState((prevState) => {
           let newState = JSON.parse(JSON.stringify(prevState));
 
-          showLog && console.log(`Clicked a Bomb on [${row},${col}]`);
+          showLog && console.log(`Oops! Clicked a Bomb on [${row},${col}]`);
           newState[row][col] = { ...newState[row][col], opened: true, backgroundColor: "red" };
           return newState;
         });
         endGameCallback(false);
       }
-    }
+    } else if (boardState[row][col].adjBombNum === 0) {
+      let visited = new Array(height).fill(1).map(() => new Array(width).fill(false));
 
-    let visited = new Array(height).fill(1).map(() => new Array(width).fill(false));
-    findAdjacentSafeCells(row, col, visited, true);
-    const adjacentSafeCells = visited.reduce(
-      (result, row, rowIdx) => [
-        ...result,
-        ...row.reduce((result, cellVisited, colIdx) => {
-          if (cellVisited === true) return [...result, { row: rowIdx, col: colIdx }];
-          else return [...result];
-        }, []),
-      ],
-      []
-    );
-    setBoardState((prevState) => {
-      let newState = JSON.parse(JSON.stringify(prevState));
+      findAdjacentSafeCells(row, col, visited);
+      const adjacentSafeCells = visited.reduce(
+        (result, row, rowIdx) => [
+          ...result,
+          ...row.reduce((result, cellVisited, colIdx) => {
+            if (cellVisited === true) return [...result, { row: rowIdx, col: colIdx }];
+            else return [...result];
+          }, []),
+        ],
+        []
+      );
+      setBoardState((prevState) => {
+        let newState = JSON.parse(JSON.stringify(prevState));
 
-      showLog && console.log("Found adjacentSafeCells", adjacentSafeCells);
-      adjacentSafeCells.forEach((cell) => {
-        newState[cell.row][cell.col].opened = true;
+        showLog && console.log("Found adjacentSafeCells", adjacentSafeCells);
+        adjacentSafeCells.forEach((cell) => {
+          newState[cell.row][cell.col].opened = true;
+        });
+        return newState;
       });
-      return newState;
-    });
 
-    openedCount.current += adjacentSafeCells.length;
+      openedCount.current += adjacentSafeCells.length;
+    } else {
+      setBoardState((prevState) => {
+        let newRow = prevState[row];
+        newRow[col].opened = true;
+        showLog && console.log(`Open a Cell at [${row},${col}]`);
+
+        return [...prevState.slice(0, row), newRow, ...prevState.slice(row + 1)];
+      });
+      openedCount.current++;
+    }
   };
 
   useEffect(() => {
