@@ -7,6 +7,8 @@ import {
   openAdjacentSafeCells,
   openCell,
   openBomb,
+  flagCell,
+  unFlagCell,
   getState,
   doSideEffect,
   pipe,
@@ -60,8 +62,14 @@ const Board = ({
     placeBomb();
   }, []);
 
-  const handleClickCell = (row, col, e) => {
-    //TODO rise flag on right click
+  const handleRightClick = (row, col) => {
+    //purpose: rise flag for certain cell
+    if (boardState[row][col].flagged)
+      setBoardState((boardState) => pipe(unFlagCell, getState)({ row, col, boardState }));
+    else setBoardState((boardState) => pipe(flagCell, getState)({ row, col, boardState }));
+  };
+
+  const handleClickCell = (row, col) => {
     //TODO performance: long time click handler
     if (boardState[row][col].opened || boardState[row][col].flagged) return;
     if (boardState[row][col].isBomb) {
@@ -129,8 +137,12 @@ const Board = ({
             <Cell
               {...cell}
               key={`cell_${idxCell}`}
-              onClick={(e) => {
-                handleClickCell(idxRow, idxCell, e);
+              onClick={() => {
+                handleClickCell(idxRow, idxCell);
+              }}
+              onRightClick={(e) => {
+                e.preventDefault();
+                handleRightClick(idxRow, idxCell);
               }}
               disabled={disabled}
               opened={cell.opened || showAll}
