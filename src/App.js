@@ -65,7 +65,7 @@ function App() {
               disabled={started}
               min={1}
               onChange={(e) => {
-                setBoardWidth(parseInt(e.target.value) || 0);
+                setBoardWidth(parseInt(e.target.value));
               }}
             />
           </label>
@@ -77,7 +77,7 @@ function App() {
               disabled={started}
               min={1}
               onChange={(e) => {
-                setBoardHeight(parseInt(e.target.value) || 0);
+                setBoardHeight(parseInt(e.target.value));
               }}
             />
           </label>
@@ -121,8 +121,8 @@ function App() {
         <section>
           <Board
             key={round}
-            width={boardWidth}
-            height={boardHeight}
+            width={boardWidth || 0}
+            height={boardHeight || 0}
             bombProbability={bombProbability}
             endGameCallback={handleEndGame}
             disabled={!started}
