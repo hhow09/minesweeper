@@ -43,8 +43,8 @@ function App() {
     boardWidth > 0 && Number.isInteger(boardHeight) && boardHeight > 0 && bombProbability > 0;
 
   const handleEndGame = (win) => {
-    if (win) alert("You win");
-    else alert("You Loose");
+    if (win) alert("You win!");
+    else alert("You lose!");
     setStarted(false);
   };
   return (
