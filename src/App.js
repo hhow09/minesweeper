@@ -1,5 +1,5 @@
 import Board from "component/Board";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import githubLogo from "assests/gitHub-logo.png";
 const pageStyle = {
   display: "flex",
@@ -23,12 +23,7 @@ const boardStyle = {
 };
 const labelStyle = { display: "flex", justifyContent: "space-between", marginBottom: "5px" };
 
-const Page = ({ title, children }) => (
-  <div style={pageStyle}>
-    <h1>{title}</h1>
-    {children}
-  </div>
-);
+const Page = ({ children }) => <div style={pageStyle}>{children}</div>;
 
 function App() {
   const [boardWidth, setBoardWidth] = useState(10);
@@ -47,6 +42,24 @@ function App() {
     else alert("You lose!");
     setStarted(false);
   };
+
+  //only update board config when round is updated
+  const BoardMemo = useMemo(
+    () => (
+      <Board
+        key={round}
+        width={boardWidth || 0}
+        height={boardHeight || 0}
+        bombProbability={bombProbability}
+        endGameCallback={handleEndGame}
+        disabled={!started}
+        showAll={round > 1 && !started}
+        showLog={showLog}
+      />
+    ),
+    [round]
+  );
+
   return (
     <>
       <Page>
@@ -124,18 +137,7 @@ function App() {
             {started ? "STOP" : "START"}
           </button>
         </section>
-        <section style={boardStyle}>
-          <Board
-            key={round}
-            width={boardWidth || 0}
-            height={boardHeight || 0}
-            bombProbability={bombProbability}
-            endGameCallback={handleEndGame}
-            disabled={!started}
-            showAll={round > 1 && !started}
-            showLog={showLog}
-          />
-        </section>
+        <section style={boardStyle}>{BoardMemo}</section>
       </Page>
     </>
   );
