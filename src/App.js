@@ -57,7 +57,7 @@ function App() {
         showLog={showLog}
       />
     ),
-    [round]
+    [round, started]
   );
 
   return (
