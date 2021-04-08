@@ -112,9 +112,9 @@ export const openBomb = ({ row, col, boardState, showLog }) => {
 };
 
 export const flagCell = ({ row, col, boardState, showLog }) => {
-  let newRow = boardState[row];
+  let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].flagged = true;
-  showLog && console.log(`Open a Cell at [${row},${col}]`);
+  showLog && console.log(`Flag a Cell at [${row},${col}]`);
 
   return {
     row,
@@ -124,10 +124,9 @@ export const flagCell = ({ row, col, boardState, showLog }) => {
 };
 
 export const unFlagCell = ({ row, col, boardState, showLog }) => {
-  let newRow = boardState[row];
+  let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].flagged = false;
-  showLog && console.log(`Open a Cell at [${row},${col}]`);
-
+  showLog && console.log(`Unflag a Cell at [${row},${col}]`);
   return {
     row,
     col,
