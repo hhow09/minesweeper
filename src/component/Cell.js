@@ -10,6 +10,7 @@ const areEqual = (prevProps, nextProps) => {
     prevProps.opened === nextProps.opened &&
     prevProps.isBomb === nextProps.isBomb &&
     prevProps.adjBombNum === nextProps.adjBombNum &&
+    prevProps.onClick === nextProps.onClick &&
     prevProps.handleRightClick === nextProps.handleRightClick &&
     prevProps.disabled === nextProps.disabled &&
     prevProps.flagged === nextProps.flagged &&
@@ -23,7 +24,7 @@ const Cell = ({
   opened,
   isBomb,
   adjBombNum,
-  // onClick,
+  onClick,
   row,
   col,
   handleRightClick,
@@ -34,17 +35,23 @@ const Cell = ({
   return (
     <div
       className={`cell ${opened && "opened"}`}
-      // onClick={!disabled ? onClick : () => null}
+      onClick={
+        !disabled
+          ? (e) => {
+              onClick(row, col);
+            }
+          : () => null
+      }
       onContextMenu={!disabled ? (e) => handleRightClick(row, col, e) : () => null}
       style={{ backgroundColor }}>
       {opened ? (
         isBomb ? (
-          <img src={bombPic} width="100%" />
+          <img src={bombPic} width="100%" alt="mine" />
         ) : (
           adjBombNum > 0 && <span className={`bombNum_${adjBombNum}`}>{adjBombNum}</span>
         )
       ) : flagged ? (
-        <img src={flagPic} width="100%" />
+        <img src={flagPic} width="100%" alt="flag" />
       ) : null}
     </div>
   );
