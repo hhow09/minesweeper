@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useReducer, useCallback } from "react";
+
 import PropTypes from "prop-types";
 import Cell from "component/Cell";
 import {
@@ -14,11 +15,118 @@ import {
   pipe,
 } from "helper";
 
+const ACTIONS = {
+  PLACE_BOMB: "PLACE_BOMB",
+  TOGGLE_FLAG_CELL: "TOGGLE_FLAG_CELL",
+  CLICK_CELL: "CLICK_CELL",
+};
+
 const DEFAULT_CELL_STATE = {
   opened: false,
   isBomb: false,
   adjBombNum: 0,
   flagged: false,
+};
+
+const boardReducer = (prevState, action) => {
+  const { row, col, width, height, bombProbability, showLog } = action;
+  const { boardState, openedCount } = JSON.parse(JSON.stringify(prevState));
+  switch (action.type) {
+    case ACTIONS.PLACE_BOMB:
+      let bombCount = 0;
+      let newState = JSON.parse(JSON.stringify(boardState));
+      let sideEffects = []; //index of cell that should adjBombNum ++ at next step
+      for (let rowIdx = 0; rowIdx < height; rowIdx++) {
+        for (let colIdx = 0; colIdx < width; colIdx++) {
+          if (Math.random() < bombProbability) {
+            newState[rowIdx][colIdx].isBomb = true;
+            bombCount++;
+            sideEffects = [...sideEffects, ...getAdjacentCells(rowIdx, colIdx, width, height)];
+          }
+        }
+      }
+      for (let cell of sideEffects) {
+        newState[cell.row][cell.col].adjBombNum++;
+      }
+      showLog && console.log(`placeBomb finished, ${bombCount} bombs are placed`);
+      return { ...prevState, boardState: newState, bombCount };
+    case ACTIONS.TOGGLE_FLAG_CELL:
+      if (boardState[row][col].flagged)
+        return {
+          ...prevState,
+          boardState: pipe(unFlagCell, getState)({ row, col, boardState, showLog }),
+        };
+      else
+        return {
+          ...prevState,
+          boardState: pipe(flagCell, getState)({ row, col, boardState, showLog }),
+        };
+    case ACTIONS.CLICK_CELL:
+      if (boardState[row][col].opened || boardState[row][col].flagged) return prevState;
+      if (boardState[row][col].isBomb) {
+        if (openedCount === 0) {
+          showLog && console.log("condition: first step, open a bomb");
+          if (boardState[row][col].adjBombNum === 0) {
+            let addOpenedCount = 0;
+            return {
+              ...prevState,
+              boardState: pipe(
+                handleFirstBomb,
+                openAdjacentSafeCells,
+                doSideEffect((args) => {
+                  addOpenedCount = args.count;
+                }),
+                getState
+              )({ row, col, boardState, showLog }),
+              bombCount: prevState.bombCount - 1,
+              openedCount: openedCount + addOpenedCount,
+            };
+          } else {
+            showLog && console.log("condition: first step, open single Cell");
+            return {
+              ...prevState,
+              boardState: pipe(
+                handleFirstBomb,
+                openCell,
+                getState
+              )({ row, col, boardState, showLog }),
+              openedCount: openedCount + 1,
+            };
+          }
+        } else {
+          showLog && console.log("condition: not first step, open a bomb");
+          return {
+            ...prevState,
+            boardState: pipe(openBomb, getState)({ row, col, boardState, showLog }),
+            openedCount: openedCount + 1,
+            endGame: true,
+          };
+        }
+      } else if (boardState[row][col].adjBombNum === 0) {
+        let addOpenedCount = 0;
+        showLog && console.log("condition: open Adjacent Safe Cells");
+        return {
+          ...prevState,
+          boardState: pipe(
+            openAdjacentSafeCells,
+            doSideEffect((args) => {
+              addOpenedCount = args.count;
+            }),
+            getState
+          )({ row, col, boardState, showLog }),
+          openedCount: openedCount + addOpenedCount,
+        };
+      } else {
+        showLog && console.log("condition: open single Cell");
+        return {
+          ...prevState,
+          boardState: pipe(openCell, getState)({ row, col, boardState, showLog }),
+          openedCount: openedCount + 1,
+        };
+      }
+    default:
+      return prevState;
+  }
 };
 
 const Board = ({
@@ -30,120 +138,57 @@ const Board = ({
   disabled = false,
   showAll = false,
 }) => {
-  const bombCount = useRef(0);
-  const openedCount = useRef(0);
-  const [boardState, setBoardState] = useState(
-    new Array(height).fill(new Array(width).fill(DEFAULT_CELL_STATE))
-  );
-  const [countToAdd, setCountToAdd] = useState(0);
-
+  const [state, dispatch] = useReducer(boardReducer, {
+    boardState: new Array(height).fill(null).map(() => new Array(width).fill(DEFAULT_CELL_STATE)),
+    bombCount: 0,
+    openedCount: 0,
+    endGame: false,
+  });
   useEffect(() => {
     const placeBomb = () => {
       showLog && console.log("placeBomb start");
-      setBoardState((prevState) => {
-        let newState = JSON.parse(JSON.stringify(prevState));
-        let sideEffects = []; //index of cell that should adjBombNum ++ at next step
-        for (let rowIdx = 0; rowIdx < height; rowIdx++) {
-          for (let colIdx = 0; colIdx < width; colIdx++) {
-            if (Math.random() < bombProbability) {
-              newState[rowIdx][colIdx].isBomb = true;
-              bombCount.current++;
-              sideEffects = [...sideEffects, ...getAdjacentCells(rowIdx, colIdx, width, height)];
-            }
-          }
-        }
-        for (let cell of sideEffects) {
-          newState[cell.row][cell.col].adjBombNum++;
-        }
-        return newState;
-      });
-      showLog && console.log(`placeBomb finished, ${bombCount.current} bombs are placed`);
+      dispatch({ type: ACTIONS.PLACE_BOMB, width, height, bombProbability, showLog });
     };
     placeBomb();
   }, []);
 
-  const handleRightClick = (row, col) => {
-    //purpose: rise flag for certain cell
-    if (boardState[row][col].flagged)
-      setBoardState((boardState) => pipe(unFlagCell, getState)({ row, col, boardState }));
-    else setBoardState((boardState) => pipe(flagCell, getState)({ row, col, boardState }));
-  };
+  useEffect(() => {
+    if (state.endGame === true) endGameCallback(false);
+  }, [state.endGame]);
 
-  const handleClickCell = (row, col) => {
-    //TODO performance: long time click handler
-    if (boardState[row][col].opened || boardState[row][col].flagged) return;
-    if (boardState[row][col].isBomb) {
-      if (openedCount.current === 0) {
-        // condition: first step, open a bomb
-        bombCount.current--;
-        if (boardState[row][col].adjBombNum === 0) {
-          // action: open adjacent cells
-          setBoardState((boardState) =>
-            pipe(
-              handleFirstBomb,
-              openAdjacentSafeCells,
-              doSideEffect((args) => {
-                // should not add
-                setCountToAdd(args.count);
-              }),
-              getState
-            )({ row, col, boardState, showLog })
-          );
-        } else {
-          // open cell
-          setBoardState((boardState) =>
-            pipe(handleFirstBomb, openCell, getState)({ row, col, boardState, showLog })
-          );
-          openedCount.current += 1;
-        }
-      } else {
-        //condition: not first step, open a bomb
-        setBoardState((boardState) => pipe(openBomb, getState)({ row, col, boardState, showLog }));
-        endGameCallback(false);
-      }
-    } else if (boardState[row][col].adjBombNum === 0) {
-      setBoardState((boardState) =>
-        pipe(
-          openAdjacentSafeCells,
-          doSideEffect((args) => {
-            setCountToAdd(args.count);
-          }),
-          getState
-        )({ row, col, boardState, showLog })
-      );
-    } else {
-      setBoardState((boardState) => pipe(openCell, getState)({ row, col, boardState, showLog }));
-      openedCount.current += 1;
-    }
-  };
+  const handleRightClick = useCallback(
+    (row, col, e) => {
+      e.preventDefault();
+      //purpose: rise flag for certain cell
+      dispatch({ type: ACTIONS.TOGGLE_FLAG_CELL, row, col, showLog });
+    },
+    [dispatch, showLog]
+  );
+
+  const handleClickCell = useCallback(
+    (row, col) => {
+      dispatch({ type: ACTIONS.CLICK_CELL, row, col, showLog });
+    },
+    [dispatch, showLog]
+  );
 
   useEffect(() => {
-    if (countToAdd > 0) {
-      openedCount.current += countToAdd;
-      setCountToAdd(0);
-    }
-  }, [countToAdd]);
-
-  useEffect(() => {
-    const isAllOpened = width * height - bombCount.current === openedCount.current;
+    const isAllOpened = width * height - state.bombCount === state.openedCount;
     if (isAllOpened) endGameCallback(true);
-  }, [openedCount.current]);
+  }, [state.openedCount, state.bombCount, endGameCallback]);
 
   return (
     <>
-      {boardState.map((row, idxRow) => (
+      {state.boardState.map((row, idxRow) => (
         <div style={{ display: "flex" }} key={`row_${idxRow}`}>
           {row.map((cell, idxCell) => (
             <Cell
               {...cell}
               key={`cell_${idxCell}`}
-              onClick={() => {
-                handleClickCell(idxRow, idxCell);
-              }}
-              onRightClick={(e) => {
-                e.preventDefault();
-                handleRightClick(idxRow, idxCell);
-              }}
+              onClick={handleClickCell}
+              row={idxRow}
+              col={idxCell}
+              handleRightClick={handleRightClick}
               disabled={disabled}
               opened={cell.opened || showAll}
             />
