@@ -85,8 +85,11 @@ graph LR
         A2[newState]
         A3{{Fail game}}
 
-        A1 --> A2 --> A3
+        subgraph Pipe
+            P1[open a bomb]
+        end
 
+        A1 --> P1 -->A2 --> A3
         style A3 fill:#FF9A9A, stroke:#FF9A9A
     end
 ```
