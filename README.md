@@ -104,7 +104,11 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
 
    Re-render of each cell happens `whenever boardState change` even for the unchanged cells because of the native characteristics of React functional component. Problem of unnecessary re-render becomes significant when scaling up board size. The goal here is to memoize the props of unchanged `Cell`.
 
-   The primitive type of props (ex. `isBomb`: boolean, `adjBombNum`: number) can be directly compare using equal operator. The trickiest of the problem is `handleClickCell`, function is an Object in javascript, depends on boardState directly which leads to the recreation itself whenever boardState change. In order to remove the dependency of boardState inside `handleClickCell`. I replaced the `useState` with `useReducer` and perform state change inside reducer. In that way the `handleClickCell` will only depend on static `dispatch` and `actions`.
+   The primitive type of props (ex. `isBomb`: boolean, `adjBombNum`: number) can be directly compare using equal operator. The trickiest of the problem is `handleClickCell`, function is an Object in javascript, depends on boardState directly which leads to the recreation itself whenever boardState change.
+
+   > `dispatch` won't change between re-renders ([reference](https://reactjs.org/docs/hooks-faq.html#how-to-avoid-passing-callbacks-down))
+
+   In order to remove the dependency of boardState inside `handleClickCell`. I replaced the `useState` with `useReducer` and perform state change inside reducer. In that way the `handleClickCell` will only depend on static `dispatch` and `actions`. Then I can easily memorize the same reference of it with `useCallback` hook and wrap `Cell` with HOC `React.memo` for preventing unnecessary re-render.
 
 ## Limitation When scaling up Board
 
