@@ -55,6 +55,8 @@ Cell.propTypes = {
   isBomb: PropTypes.bool.isRequired,
   adjBombNum: PropTypes.number.isRequired,
   onClick: PropTypes.func.isRequired,
+  row: PropTypes.number.isRequired,
+  col: PropTypes.number.isRequired,
   flagged: PropTypes.bool,
 };
 
