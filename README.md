@@ -23,22 +23,53 @@ Implement the classic Windows game Minesweeper with React.
 
 ## Documentation
 
-### 1. Config
+### Basic Structure
+
+#### Config
 
 - Board Width: how many columns of a board
 - Board Height: how many rows of a board
 - Bomb Probability: the probability of whether a cell is a mine
 - Show Log: show the log of function execution in Devtool console panel
 
+#### Board
+
+- Purpose: a component maintaining the state of game.
+- Lifecycle: uncontrolled component, remount on each round.
+- State
+  - boardState: 2D Array of cellState, recording the current board status.
+    - cellState: Object type, basic unit of boardState, recording the cell status
+    ```javascript
+    DEFAULT_CELL_STATE = {
+      opened: false,
+      isBomb: false,
+      adjBombNum: 0,
+      flagged: false,
+    };
+    ```
+  - bombCount: number type, recording the mine(bomb) number.
+  - openedCount: number type, recording the opened cell number.
+
+#### Cell
+
+- Purpose: a direct visual representation of boardState.
+- Lifecycle: controlled component, re-render on props change
+- State: stateless component
+
+## Process
+
+### 1. Start a game
+
 ### 2. Prepare Board
 
 ![prepare Board](https://github.com/hhow09/minesweeper/blob/master/flowchart/prepare-board.png?raw=true)
 
-#### Create Board Matrix
+#### 2-1. Create Board Matrix
 
-generate 2D array of board state based on `Board Width` and `Board Height`. Each element contains a least basic properties of a cell: `opened`, `isBomb`, `adjBombNum` and `flagged`.
+- Generate 2D array of board state based on `Board Width` and `Board Height`.
+- Each element contains a least basic properties of a cell: `opened`, `isBomb`, `adjBombNum` and `flagged`.
 
-#### Place Bombs
+#### 2-2. Place Bombs
 
 iterate through every cell of board state and performs following actions respectively.
 
@@ -88,27 +119,40 @@ Flag / Unflag a cell
 
 ![check board status](https://github.com/hhow09/minesweeper/blob/master/flowchart/check-board-status.png?raw=true)
 
-## Designs I have tried
+- Win condition
+
+  ```
+  board width * board height - bombCount === opened count
+  ```
+
+- Lose condition:
+  ```
+  clicked a bomb && not first step
+  ```
+
+## Refactor Log
 
 I have tried several ways of `handleClickCell` for updating `boardState` (list in chronological order)
 
-1. Multiple steps of setState
+1. Multiple steps of setState (not work)
 
-   The first and naive design is performing multiple steps of `setState` (ex. handleFirstBomb, openAdjacentSafeCells...) inside `handleClickCell` function. `It did not worked` because each step relies on the result of previous step and the fact that `setState` of React does not work synchronously.
+   Since I maintain the boardState with `useState`, the first and naive implementation of `handleClickCell` is performing multiple steps of `setState` (ex. handleFirstBomb, openAdjacentSafeCells...). It did not worked because each step relies on the result of previous step and `setState` of React does not work synchronously.
 
 2. Single setState with pipeline of pure functions
 
-   Instead of multiple `setState`, I refactored `handleClickCell` into single setState function with pipeline of pure functions executed inside updater function of setState. `It worked`. All functions are listed in `helper.js`.
+   Instead of multiple `setState`, I refactored `handleClickCell` into single setState function with pipeline of pure functions executed inside updater function of setState. `It worked`.
 
 3. State management with useReducer
 
-   Re-render of each cell happens `whenever boardState change` even for the unchanged cells because of the native characteristics of React functional component. Problem of unnecessary re-render becomes significant when scaling up board size. The goal here is to memoize the props of unchanged `Cell`.
+   Since native characteristics of React functional component, the Re-render of each Cell happens `whenever boardState change`, even for the unchanged cells. Unnecessary re-render slow down the re-render process. It becomes significant when scaling up board size. React provide `useCallback` hook and `memo` HOC for performance optimization. I expected performance optimization by reducing the unnecessary re-render.
 
-   The primitive type of props (ex. `isBomb`: boolean, `adjBombNum`: number) can be directly compare using equal operator. The trickiest of the problem is `handleClickCell`, function is an Object in javascript, depends on boardState directly which leads to the recreation itself whenever boardState change.
+   To utilize `memo` HOC, the goal here is to distinguish and compare if the props of `Cell` unchanged.
+
+   The primitive type of props (ex. `isBomb`: boolean, `adjBombNum`: number) can be directly compared using equal operator. The trickiest of the part is `handleClickCell` because function recreate whenever state update and it use boardState directly, which means it must be recreate to get the latest boardState on each re-render.
 
    > `dispatch` won't change between re-renders ([reference](https://reactjs.org/docs/hooks-faq.html#how-to-avoid-passing-callbacks-down))
 
-   In order to remove the dependency of boardState inside `handleClickCell`. I replaced the `useState` with `useReducer` and perform state change inside reducer. In that way the `handleClickCell` will only depend on static `dispatch` and `actions`. Then I can easily memorize the same reference of it with `useCallback` hook and wrap `Cell` with HOC `React.memo` for preventing unnecessary re-render.
+   In order to remove the dependency of boardState inside `handleClickCell`. I replaced the `useState` with `useReducer` and perform state change inside reducer. In that way the `handleClickCell` only depends on static `dispatch` and `actions`, which means all the `onClick` of Cell props `is essentially same` and `does not change on re-render`. Then I can easily memoize the same reference of it with `useCallback` hook and wrap `Cell` with `memo` HOC for preventing unnecessary re-render of Cell.
 
 ## Limitation When scaling up Board
 
