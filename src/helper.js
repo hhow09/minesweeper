@@ -1,6 +1,8 @@
-const getBoardWH = (boardState) => ({ width: boardState[0].length, height: boardState.length });
+function getBoardWH(boardState) {
+  return { width: boardState[0].length, height: boardState.length };
+}
 
-export const getAdjacentCells = (row, col, width, height) => {
+export function getAdjacentCells(row, col, width, height) {
   let adjacentCells = [];
   if (row - 1 >= 0) {
     adjacentCells.push({ row: row - 1, col }); //top
@@ -16,9 +18,9 @@ export const getAdjacentCells = (row, col, width, height) => {
   if (col + 1 < width) adjacentCells.push({ row, col: col + 1 }); //right
 
   return adjacentCells;
-};
+}
 
-export const handleFirstBomb = ({ row, col, boardState, showLog }) => {
+export function handleFirstBomb({ row, col, boardState, showLog }) {
   showLog && console.log(`first click on [${row},${col}] is a bomb. Remove it!`);
   const { width, height } = getBoardWH(boardState);
   const adjacentCells = getAdjacentCells(row, col, width, height);
@@ -31,9 +33,9 @@ export const handleFirstBomb = ({ row, col, boardState, showLog }) => {
     console.log(`Bomb number of adjacent cells (adjBombNum) are also updated.`, adjacentCells);
 
   return { row, col, boardState: newState };
-};
+}
 
-export const openCell = ({ row, col, boardState, showLog }) => {
+export function openCell({ row, col, boardState, showLog }) {
   let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].opened = true;
   showLog && console.log(`Open a Cell at [${row},${col}]`);
@@ -43,9 +45,9 @@ export const openCell = ({ row, col, boardState, showLog }) => {
     col,
     boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
   };
-};
+}
 
-const findAdjacentSafeCells = (row, col, visited, boardState) => {
+function findAdjacentSafeCells(row, col, visited, boardState) {
   const { width, height } = getBoardWH(boardState);
   // purpose: Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
   if (
@@ -69,9 +71,9 @@ const findAdjacentSafeCells = (row, col, visited, boardState) => {
     adjacentCells.forEach((cell) => {
       findAdjacentSafeCells(cell.row, cell.col, visited, boardState);
     });
-};
+}
 
-export const openAdjacentSafeCells = ({ row, col, boardState, showLog }) => {
+export function openAdjacentSafeCells({ row, col, boardState, showLog }) {
   const { width, height } = getBoardWH(boardState);
   let visited = new Array(height).fill(1).map(() => new Array(width).fill(false));
   findAdjacentSafeCells(row, col, visited, boardState);
@@ -97,9 +99,9 @@ export const openAdjacentSafeCells = ({ row, col, boardState, showLog }) => {
     boardState: newState,
     count: adjacentSafeCells.length,
   };
-};
+}
 
-export const openBomb = ({ row, col, boardState, showLog }) => {
+export function openBomb({ row, col, boardState, showLog }) {
   let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col] = { ...newRow[col], opened: true, backgroundColor: "red" };
   showLog && console.log(`Oops! Clicked a Bomb on [${row},${col}]`);
@@ -109,9 +111,9 @@ export const openBomb = ({ row, col, boardState, showLog }) => {
     col,
     boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
   };
-};
+}
 
-export const flagCell = ({ row, col, boardState, showLog }) => {
+export function flagCell({ row, col, boardState, showLog }) {
   let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].flagged = true;
   showLog && console.log(`Flag a Cell at [${row},${col}]`);
@@ -121,9 +123,9 @@ export const flagCell = ({ row, col, boardState, showLog }) => {
     col,
     boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
   };
-};
+}
 
-export const unFlagCell = ({ row, col, boardState, showLog }) => {
+export function unFlagCell({ row, col, boardState, showLog }) {
   let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].flagged = false;
   showLog && console.log(`Unflag a Cell at [${row},${col}]`);
@@ -132,7 +134,7 @@ export const unFlagCell = ({ row, col, boardState, showLog }) => {
     col,
     boardState: [...boardState.slice(0, row), newRow, ...boardState.slice(row + 1)],
   };
-};
+}
 
 export const doSideEffect = (fn) => (args) => {
   fn(args);
