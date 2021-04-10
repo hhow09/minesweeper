@@ -144,7 +144,7 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
 
 3. Performance Optimization: State management with useReducer
 
-   Since native characteristics of React functional component, the Re-render of each Cell happens `whenever boardState change`, even for the unchanged cells. Unnecessary re-render slow down the re-render process. It becomes significant when scaling up board size. React provide `useCallback` hook and `memo` HOC for performance optimization. I expected performance optimization by reducing the unnecessary re-render.
+   Since `render` time increase as board size grows. I thought about the native characteristics of React functional component, the Re-render of each Cell happens `whenever boardState change`, even for the unchanged cells. Unnecessary re-render can slow down the re-render process. React provide `useCallback` hook and `memo` HOC for performance optimization. I expected performance optimization by reducing the unnecessary re-render.
 
    To utilize `memo` HOC, the goal here is to distinguish and compare if the props of `Cell` unchanged.
 
@@ -153,6 +153,10 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
    > `dispatch` won't change between re-renders ([reference](https://reactjs.org/docs/hooks-faq.html#how-to-avoid-passing-callbacks-down))
 
    In order to remove the dependency of boardState inside `handleClickCell`. I replaced the `useState` with `useReducer` and perform state change inside reducer. In that way the `handleClickCell` only depends on static `dispatch` and `actions`, which means all the `onClick` of Cell props `is essentially same` and `does not change on re-render`. Then I can easily memoize the same reference of it with `useCallback` hook and wrap `Cell` with `memo` HOC for preventing unnecessary re-render of Cell.
+
+   ### Result
+
+   After the refactoring, I inspected the performance with Chrome devtools. I found out that performance was not improved and the bottleneck actually lies in `unstable_runWithPriority` of `React scheduler`, not the render process of `Cell`. The `Cell` itself maybe too simple to affect the performance. I should have noticed that before refactoring!
 
 ## Limitation When scaling up Board
 
