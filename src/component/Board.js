@@ -30,7 +30,7 @@ const DEFAULT_CELL_STATE = {
 
 const boardReducer = (prevState, action) => {
   const { row, col, width, height, bombProbability, showLog } = action;
-  const { boardState, openedCount } = JSON.parse(JSON.stringify(prevState));
+  const { boardState, openedCount } = prevState;
   switch (action.type) {
     case ACTIONS.PLACE_BOMB:
       let bombCount = 0;
