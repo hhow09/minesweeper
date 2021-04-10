@@ -34,7 +34,7 @@ export const handleFirstBomb = ({ row, col, boardState, showLog }) => {
 };
 
 export const openCell = ({ row, col, boardState, showLog }) => {
-  let newRow = boardState[row];
+  let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col].opened = true;
   showLog && console.log(`Open a Cell at [${row},${col}]`);
 
@@ -100,7 +100,7 @@ export const openAdjacentSafeCells = ({ row, col, boardState, showLog }) => {
 };
 
 export const openBomb = ({ row, col, boardState, showLog }) => {
-  let newRow = boardState[row];
+  let newRow = JSON.parse(JSON.stringify(boardState[row]));
   newRow[col] = { ...newRow[col], opened: true, backgroundColor: "red" };
   showLog && console.log(`Oops! Clicked a Bomb on [${row},${col}]`);
 
