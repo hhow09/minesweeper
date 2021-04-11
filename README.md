@@ -158,6 +158,8 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
 
    After the refactoring, I inspected the performance with Chrome devtools. I found out that performance was not improved and the bottleneck actually lies in `unstable_runWithPriority` of `React scheduler`, not the render process of `Cell`. The `Cell` itself maybe too simple to affect the performance. I should have noticed that before refactoring!
 
+   It would be interesting to compare React project with other examples made with pure javascript (without framework). For example: [Hedronium/minesweeper](https://github.com/Hedronium/minesweeper), it directly manipulate DOM tree. Only with rough comparison, under the same Board configuration, performance does not have significant difference compared to this project.
+
 ## Limitation When scaling up Board
 
 1. Recursion and Maximum call stack exceed
