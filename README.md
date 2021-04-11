@@ -138,11 +138,11 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
 
    Since I maintain the boardState with `useState`, the first and naive implementation of `handleClickCell` is performing multiple steps of `setState` (ex. handleFirstBomb, openAdjacentSafeCells...). It did not worked because each step relies on the result of previous step and `setState` of React does not work synchronously.
 
-2. Single setState with pipeline of pure functions
+2. Single setState with pipeline of pure functions (commits after: [refactor: functions into pure function](https://github.com/hhow09/minesweeper/commit/cbe56518ee268b06b648ebad1a791ea1f94fd111))
 
    Instead of multiple `setState`, I refactored `handleClickCell` into single setState function with pipeline of pure functions executed inside updater function of setState. `It is the first working version`.
 
-3. Performance Optimization: State management with useReducer
+3. Performance Optimization: State management with useReducer (commits after [refactor: useReducer](https://github.com/hhow09/minesweeper/commit/fa77d7c6c68725bb85755fdf2b08b628adcc05e3))
 
    Since `render` time increase as board size grows. I thought about the native characteristics of React functional component, the Re-render of each Cell happens `whenever boardState change`, even for the unchanged cells. Unnecessary re-render can slow down the re-render process. React provide `useCallback` hook and `memo` HOC for performance optimization. I expected performance optimization by reducing the unnecessary re-render.
 
