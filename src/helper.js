@@ -50,27 +50,23 @@ export function openCell({ row, col, boardState, showLog }) {
 function findAdjacentSafeCells(row, col, visited, boardState) {
   const { width, height } = getBoardWH(boardState);
   // purpose: Clicking a square with no adjacent mine clears that square and clicks all adjacent squares.
-  if (
-    boardState[row][col].opened === true ||
-    visited[row][col] ||
-    boardState[row][col].isBomb === true
-  )
-    //stop condition
-    return;
-  else if (boardState[row][col].adjBombNum > 0) {
-    visited[row][col] = true;
-    return;
-  }
-  visited[row][col] = true;
-
-  const adjacentCells = getAdjacentCells(row, col, width, height).filter(
-    (cell) => !visited[cell.row][cell.col] && !boardState[row][col].opened
-  );
-
-  adjacentCells.length > 0 &&
-    adjacentCells.forEach((cell) => {
-      findAdjacentSafeCells(cell.row, cell.col, visited, boardState);
+  // strategy: BFS
+  let queue = [{ row, col }];
+  while (queue.length > 0) {
+    const { row, col } = queue.shift();
+    getAdjacentCells(row, col, width, height).forEach((cell) => {
+      if (
+        !visited[cell.row][cell.col] &&
+        !boardState[cell.row][cell.col].opened &&
+        !boardState[cell.row][cell.col].isBomb
+      ) {
+        visited[cell.row][cell.col] = true;
+        if (boardState[cell.row][cell.col].adjBombNum === 0) {
+          queue.push(cell);
+        }
+      }
     });
+  }
 }
 
 export function openAdjacentSafeCells({ row, col, boardState, showLog }) {
