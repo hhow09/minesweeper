@@ -165,3 +165,11 @@ I have tried several ways of `handleClickCell` for updating `boardState` (list i
 1. Recursion and Maximum call stack exceed
 
    When `bombProbability` is low (ex.0.01) , e.g. lots of safe cells, the recursive method of `findAdjacentSafeCells` is prone to `Maximum call stack size exceeded error`. Common technique to prevent recursion from call stack size exceed is to push recursion into macro task using `setTimeout`. Since it is called inside setState, which should be synchronous and pure, `setTimeout` does not work here.
+
+---
+
+Update: 2020/04/12
+
+## Refactor: `openAdjacentSafeCells`
+
+To solve the `Maximum call stack exceed` error encountered above, I refactored the recursion method into iterative BFS on this commit: [refactor: openAdjacentSafeCells BFS](https://github.com/hhow09/minesweeper/commit/4f813e5c78ade33ee3add709af7dabe50d26271a).

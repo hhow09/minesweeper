@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "https://hhow09.github.io/minesweeper/static/css/main.998d2dcb.chunk.css",
-    "main.js": "https://hhow09.github.io/minesweeper/static/js/main.2a641ab4.chunk.js",
-    "runtime-main.js": "https://hhow09.github.io/minesweeper/static/js/runtime-main.eba32e51.js",
-    "static/js/2.e1f549f0.chunk.js": "https://hhow09.github.io/minesweeper/static/js/2.e1f549f0.chunk.js",
-    "static/js/3.4618cb60.chunk.js": "https://hhow09.github.io/minesweeper/static/js/3.4618cb60.chunk.js",
+    "main.js": "https://hhow09.github.io/minesweeper/static/js/main.93bc26b3.chunk.js",
+    "runtime-main.js": "https://hhow09.github.io/minesweeper/static/js/runtime-main.72da8e8d.js",
+    "static/js/2.980ef176.chunk.js": "https://hhow09.github.io/minesweeper/static/js/2.980ef176.chunk.js",
+    "static/js/3.beb55570.chunk.js": "https://hhow09.github.io/minesweeper/static/js/3.beb55570.chunk.js",
     "index.html": "https://hhow09.github.io/minesweeper/index.html",
-    "static/js/2.e1f549f0.chunk.js.LICENSE.txt": "https://hhow09.github.io/minesweeper/static/js/2.e1f549f0.chunk.js.LICENSE.txt",
+    "static/js/2.980ef176.chunk.js.LICENSE.txt": "https://hhow09.github.io/minesweeper/static/js/2.980ef176.chunk.js.LICENSE.txt",
     "static/media/bomb.80edd8c7.png": "https://hhow09.github.io/minesweeper/static/media/bomb.80edd8c7.png"
   },
   "entrypoints": [
-    "static/js/runtime-main.eba32e51.js",
-    "static/js/2.e1f549f0.chunk.js",
+    "static/js/runtime-main.72da8e8d.js",
+    "static/js/2.980ef176.chunk.js",
     "static/css/main.998d2dcb.chunk.css",
-    "static/js/main.2a641ab4.chunk.js"
+    "static/js/main.93bc26b3.chunk.js"
   ]
 }
